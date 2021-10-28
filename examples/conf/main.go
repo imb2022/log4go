@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	log "github.com/kdpujie/log4go"
+	log "github.com/imb2022/log4go"
 )
 
 func main() {

@@ -11,17 +11,6 @@
     "enable": true,
     "color": true
   },
-  "ali_log_hub_writer": {
-    "level": "debug",
-    "enable": false,
-    "log_name": "",
-    "project_name": "",
-    "endpoint": "",
-    "access_key_id": "",
-    "access_key_secret": "",
-    "store_name": "dsp_syslog",
-    "buf_size": 1000
-  },
   "kafka_writer": {
     "level": "ERROR",
     "on": false,

@@ -1,9 +1,5 @@
-module github.com/kdpujie/log4go
+module github.com/imb2022/log4go
 
-go 1.14
+go 1.16
 
-require (
-	github.com/Shopify/sarama v1.26.4
-	github.com/aliyun/aliyun-log-go-sdk v0.1.8
-	google.golang.org/protobuf v1.23.0
-)
+require github.com/Shopify/sarama v1.30.0

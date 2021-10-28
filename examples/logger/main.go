@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/kdpujie/log4go"
+	"github.com/imb2022/log4go"
 )
 
 func SetLog() (logger *log4go.Logger) {
@@ -15,7 +15,7 @@ func SetLog() (logger *log4go.Logger) {
 
 	logger = log4go.NewLogger()
 	logger.Register(w)
-	logger.SetLevel(log4go.ERROR)
+	logger.SetLevel(log4go.DEBUG) // global min level
 	return
 }
 
@@ -23,7 +23,7 @@ func main() {
 	logger := SetLog()
 	defer logger.Close()
 
-	var name = "skoo"
+	var name = "xwi88"
 	logger.Debug("log4go by %s", name)
 	logger.Info("log4go by %s", name)
 	logger.Warn("log4go by %s", name)

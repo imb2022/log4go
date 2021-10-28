@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/kdpujie/log4go/util"
+	"github.com/imb2022/log4go/util"
 )
 
 // GlobalLevel global level
@@ -42,21 +42,49 @@ type ConfAliLogHubWriter struct {
 
 // LogConfig log config
 type LogConfig struct {
-	Level           string              `json:"level" mapstructure:"level"`
-	FullPath        bool                `json:"full_path" mapstructure:"full_path"`
-	FileWriter      ConfFileWriter      `json:"file_writer" mapstructure:"file_writer"`
-	ConsoleWriter   ConfConsoleWriter   `json:"console_writer" mapstructure:"console_writer"`
-	AliLogHubWriter ConfAliLogHubWriter `json:"ali_log_hub_writer" mapstructure:"ali_log_hub_writer"`
-	KafKaWriter     ConfKafKaWriter     `json:"kafka_writer" mapstructure:"kafka_writer"`
+	// global level, maybe override by real minimum multi writer level
+	Level         string            `json:"level" mapstructure:"level"`
+	FullPath      bool              `json:"full_path" mapstructure:"full_path"`
+	FileWriter    ConfFileWriter    `json:"file_writer" mapstructure:"file_writer"`
+	ConsoleWriter ConfConsoleWriter `json:"console_writer" mapstructure:"console_writer"`
+	KafKaWriter   ConfKafKaWriter   `json:"kafka_writer" mapstructure:"kafka_writer"`
 }
 
-// SetupLog setup log
+// SetupLog setup log, caller shall use this method
 func SetupLog(lc LogConfig) (err error) {
-	// 全局配置
+	// global config
 	GlobalLevel = getLevel(lc.Level)
+
+	// writer enable
+	// 1. if not set level, use global level;
+	// 2. if set level, use min level
+	validGlobalMinLevel := FATAL // default max level
+	validGlobalMinLevelBy := "global"
+
+	if lc.FileWriter.Enable {
+		validGlobalMinLevel = util.MinInt(getLevel0(lc.FileWriter.Level, GlobalLevel), validGlobalMinLevel)
+		if validGlobalMinLevel == getLevel0(lc.FileWriter.Level, GlobalLevel) {
+			validGlobalMinLevelBy = "file_writer"
+		}
+	}
+
+	if lc.ConsoleWriter.Enable {
+		validGlobalMinLevel = util.MinInt(getLevel0(lc.ConsoleWriter.Level, GlobalLevel), validGlobalMinLevel)
+		if validGlobalMinLevel == getLevel0(lc.ConsoleWriter.Level, GlobalLevel) {
+			validGlobalMinLevelBy = "console_writer"
+		}
+	}
+
+	if lc.KafKaWriter.Enable {
+		validGlobalMinLevel = util.MinInt(getLevel0(lc.KafKaWriter.Level, GlobalLevel), validGlobalMinLevel)
+		if validGlobalMinLevel == getLevel0(lc.KafKaWriter.Level, GlobalLevel) {
+			validGlobalMinLevelBy = "kafka_writer"
+		}
+	}
 
 	fullPath := lc.FullPath
 	ShowFullPath(fullPath)
+	SetLevel(validGlobalMinLevel)
 
 	if lc.FileWriter.Enable {
 		w := NewFileWriter()
@@ -74,25 +102,13 @@ func SetupLog(lc LogConfig) (err error) {
 		Register(w)
 	}
 
-	if lc.AliLogHubWriter.Enable {
-		w := NewAliLogHubWriter(lc.AliLogHubWriter.BufSize)
-		if lc.AliLogHubWriter.LogSource == "" {
-			lc.AliLogHubWriter.LogSource = util.GetLocalIpByTcp()
-		}
-		w.level = getLevel0(lc.AliLogHubWriter.Level, GlobalLevel)
-		w.SetLog(lc.AliLogHubWriter.LogName, lc.AliLogHubWriter.LogSource)
-		w.SetProject(lc.AliLogHubWriter.ProjectName, lc.AliLogHubWriter.StoreName)
-		w.SetEndpoint(lc.AliLogHubWriter.Endpoint)
-		w.SetAccessKey(lc.AliLogHubWriter.AccessKeyId, lc.AliLogHubWriter.AccessKeySecret)
-		Register(w)
-	}
-
 	if lc.KafKaWriter.Enable {
 		w := NewKafKaWriter(&lc.KafKaWriter)
 		w.level = getLevel0(lc.KafKaWriter.Level, GlobalLevel)
 		Register(w)
 	}
-	// 全局配置
+
+	log.Printf("validGlobalLevel(min:%v, by:%v)", validGlobalMinLevel, validGlobalMinLevelBy)
 	return nil
 }
 
@@ -113,13 +129,13 @@ func getLevel(flag string) int {
 	return getLevel0(flag, DEBUG)
 }
 
-// 默认为Debug模式
+// default DEBUG
 func getLevel0(flag string, defaultFlag int) int {
 	for i, f := range LevelFlags {
 		if strings.TrimSpace(strings.ToUpper(flag)) == f {
 			return i
 		}
 	}
-	log.Printf("[ERROR] 未找到合适的日志级别[%s]，使用默认值:%d\n", flag, defaultFlag)
+	log.Printf("[log4go] WARN, no match level for: %v, use default level: %d\n", flag, defaultFlag)
 	return defaultFlag
 }

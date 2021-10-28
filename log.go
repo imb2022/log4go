@@ -23,7 +23,9 @@ const (
 	FATAL
 )
 
-const tunnelSizeDefault = 1024
+const (
+	tunnelSizeDefault = 2048
+)
 
 // Record record struct
 type Record struct {
@@ -57,9 +59,9 @@ type Flusher interface {
 
 // Logger log struct
 type Logger struct {
-	writers []Writer
-	tunnel  chan *Record
-	// level       int
+	writers     []Writer
+	tunnel      chan *Record
+	level       int // input level, valid minimum global level
 	lastTime    int64
 	lastTimeStr string
 	c           chan bool
@@ -80,7 +82,6 @@ func NewLogger() *Logger {
 	l.writers = make([]Writer, 0, 2)
 	l.tunnel = make(chan *Record, tunnelSizeDefault)
 	l.c = make(chan bool, 1)
-	// l.level = DEBUG
 	l.layout = "2006/01/02 15:04:05"
 
 	go bootstrapLogWriter(l)
@@ -96,9 +97,9 @@ func (l *Logger) Register(w Writer) {
 	l.writers = append(l.writers, w)
 }
 
-// SetLevel Logger set level
+// SetLevel Logger set default level
 func (l *Logger) SetLevel(lvl int) {
-	// l.level = lvl
+	l.level = lvl
 }
 
 // SetLayout Logger set the time data format, layout
@@ -148,9 +149,9 @@ func (l *Logger) Close() {
 func (l *Logger) deliverRecordToWriter(level int, format string, args ...interface{}) {
 	var inf, code string
 
-	/*	if level < l.level {
+	if level < l.level {
 		return
-	}*/
+	}
 
 	if format != "" {
 		inf = fmt.Sprintf(format, args...)
@@ -260,7 +261,7 @@ var (
 // SetLevel global set level is ignore
 // logger level should be set in specific logger
 func SetLevel(lvl int) {
-	// loggerDefault.level = lvl
+	loggerDefault.level = lvl
 }
 
 // SetLayout loggerDefault set the time format layout

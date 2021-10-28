@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	log "github.com/kdpujie/log4go"
+	log "github.com/imb2022/log4go"
 )
 
 func SetLog() {
@@ -30,7 +30,7 @@ func main() {
 	SetLog()
 	defer log.Close()
 
-	var name = "skoo"
+	var name = "xwi88"
 
 	for {
 		log.Debug("log4go by %s", name)

@@ -3,8 +3,8 @@ package main
 import (
 	"time"
 
-	log "github.com/kdpujie/log4go"
-	"github.com/kdpujie/log4go/util"
+	log "github.com/imb2022/log4go"
+	"github.com/imb2022/log4go/util"
 )
 
 // SetLog set logger

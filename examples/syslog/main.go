@@ -1,7 +1,7 @@
 package main
 
 import (
-	log "github.com/kdpujie/log4go"
+	log "github.com/imb2022/log4go"
 )
 
 func SetLog() {
@@ -18,7 +18,7 @@ func main() {
 	SetLog()
 	defer log.Close()
 
-	var name = "skoo"
+	var name = "xwi88"
 	log.Debug("log4go by %s", name)
 	log.Info("log4go by %s", name)
 	log.Warn("log4go by %s", name)
