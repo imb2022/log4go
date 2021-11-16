@@ -58,7 +58,7 @@ type KafKaWriter struct {
 func NewKafKaWriter(conf *ConfKafKaWriter) *KafKaWriter {
 	defaultLevel := 0
 	if conf.Level != "" {
-		defaultLevel = getLevel0(conf.Level, defaultLevel)
+		defaultLevel = getLevel0(conf.Level, defaultLevel, "")
 	}
 
 	return &KafKaWriter{
